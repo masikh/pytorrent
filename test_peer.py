@@ -6,7 +6,7 @@ ses = libtorrent.session()
 ses.listen_on(6881, 6891)
 
 info = libtorrent.torrent_info('/home/robert/Desktop/test.torrent')
-h = ses.add_torrent({'ti': info, 'save_path': '/libraries/TVShows/Westworld/'})
+h = ses.add_torrent({'ti': info, 'save_path': '/home/robert/Downloads/TORRENTS'})
 print('starting', h.name())
 
 count = 1
@@ -15,6 +15,7 @@ while True:
 
     state_str = ['queued', 'checking', 'downloading metadata', 'downloading',
                  'finished', 'seeding', 'allocating', 'checking fastresume']
+    print('\r{whitespace}'.format(whitespace=' ' * 200)),
     dots = '.' * count
     print('\r%.2f%% complete (down: %.1f kb/s up: %.1f kB/s peers: %d seeds: %d leeches: %d) %s %s' % (s.progress * 100, s.download_rate / 1000,
                                                                                                        s.upload_rate / 1000, s.num_peers,

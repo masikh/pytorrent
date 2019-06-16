@@ -1,2 +1,4 @@
 libtorrent
 bencode
+simpledb
+pickle
