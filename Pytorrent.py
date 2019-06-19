@@ -4,10 +4,17 @@ import sys
 
 ses = libtorrent.session()
 ses.listen_on(6881, 6891)
+ses.set_local_upload_rate_limit(1000000)
+ses.set_local_download_rate_limit(1000000)
 
 info = libtorrent.torrent_info('/home/robert/Desktop/test.torrent')
 h = ses.add_torrent({'ti': info, 'save_path': '/libraries/TVShows/Westworld/'})
+h.set_download_limit(1000000)
+h.set_upload_limit(1000000)
+
 print('starting', h.name())
+
+
 
 count = 1
 while True:
