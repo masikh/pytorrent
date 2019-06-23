@@ -1,16 +1,20 @@
+# pytorrent-tracker.py
+# A bittorrent tracker
+
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
-from logging import basicConfig, INFO
+from logging import basicConfig, info, INFO
+from pickle import dump, load
 from socket import inet_aton
 from struct import pack
 from urllib import urlopen
 from urlparse import parse_qs
-from simpledb import Client as Database
 
+from bencode import encode
+from simpledb import Database
 
 """ Return the decoded request string. 
 """
-
 
 def decode_request(path):
     # Strip off the start characters
@@ -34,7 +38,7 @@ def add_peer(torrents, info_hash, peer_id, ip, port):
             torrents[info_hash].append((peer_id, ip, port))
     # Otherwise, add the info_hash and the peer
     else:
-       torrents[info_hash] = [(peer_id, ip, port)]
+        torrents[info_hash] = [(peer_id, ip, port)]
 
 
 """ Return a compact peer string, given a list of peer details. 
@@ -53,17 +57,19 @@ def make_compact_peer_list(peer_list):
 
 
 """ Return an expanded peer list suitable for the client, given
-    the peer list. 
+	the peer list. 
 """
-
 
 def make_peer_list(peer_list):
     peers = []
     for peer in peer_list:
-        p = {'peer id': peer[0],
-             'ip': peer[1],
-             'port': int(peer[2])}
+        p = {}
+        p["peer id"] = peer[0]
+        p["ip"] = peer[1]
+        p["port"] = int(peer[2])
+
         peers.append(p)
+
     return peers
 
 
@@ -79,47 +85,97 @@ def peer_list(peer_list, compact):
         return make_peer_list(peer_list)
 
 
+""" Take a request, do some some database work, return a peer
+    list response. 
+"""
+
+
 class RequestHandler(BaseHTTPRequestHandler):
+    def do_GET(s):
+        # Decode the request
+        package = decode_request(s.path)
+
+        if not package:
+            s.send_error(403)
+            return
+
+        # Get the necessary info out of the request
+        info_hash = package["info_hash"][0]
+        compact = bool(package["compact"][0])
+        ip = s.client_address[0]
+        port = package["port"][0]
+        peer_id = package["peer_id"][0]
+
+        add_peer(s.server.torrents, info_hash, peer_id, ip, port)
+
+        # Generate a response
+        response = {}
+        response["interval"] = s.server.interval
+        response["complete"] = 0
+        response["incomplete"] = 0
+        response["peers"] = peer_list(s.server.torrents[info_hash], compact)
+
+        # Send off the response
+        s.send_response(200)
+        s.end_headers()
+        s.wfile.write(encode(response))
+
+        # Log the request, and what we send back
+        info("PACKAGE: %s", package)
+        info("RESPONSE: %s", response)
+
+    """ Just supress logging. 
+    """
+
     def log_message(self, format, *args):
-        # Just logging.
+
         return
 
 
-class Tracker():
-    def __init__(self,
-                 host="",
-                 port=9010,
-                 interval=5,
-                 log="tracker.log"):
+""" Read in the initial values, load the database. 
+"""
 
+
+class Tracker:
+    def __init__(self, host="", port=9010, interval=5, torrent_db="tracker.db", log="tracker.log", inmemory=True):
         self.host = host
         self.port = port
-        self.thread = None
+
+        self.inmemory = inmemory
+
         self.server_class = HTTPServer
         self.httpd = self.server_class((self.host, self.port), RequestHandler)
-        self.running = False
+
+        self.running = False	# We're not running to begin with
 
         self.server_class.interval = interval
 
         # Set logging info
-        basicConfig(filename=log, level=INFO)
-        self.server_class.torrents = Database(None)
+        basicConfig(filename = log, level = INFO)
+
+        # If not in memory, give the database a file, otherwise it
+        # will stay in memory
+        if not self.inmemory:
+            self.server_class.torrents = Database(torrent_db)
+        else:
+            self.server_class.torrents = Database(None)
 
     """ Keep handling requests, until told to stop. 
     """
 
     def runner(self):
+
         while self.running:
             self.httpd.handle_request()
-            print('got request')
 
-    """ Start the runner, in a separate thread. 
+    """ Start the runner, in a seperate thread. 
     """
 
     def run(self):
         if not self.running:
             self.running = True
-            self.thread = Thread(target=self.runner)
+
+            self.thread = Thread(target = self.runner)
             self.thread.start()
 
     """ Send a dummy request to the server. 
@@ -136,6 +192,7 @@ class Tracker():
     def stop(self):
         if self.running:
             self.running = False
+
             self.send_dummy_request()
             self.thread.join()
 

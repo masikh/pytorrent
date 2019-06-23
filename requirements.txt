@@ -2,3 +2,4 @@ libtorrent
 bencode
 simpledb
 pickle
+BaseHTTPServer
