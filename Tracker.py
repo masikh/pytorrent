@@ -16,6 +16,7 @@ from bencode import encode
 """ Return the decoded request string. 
 """
 
+
 def decode_request(path):
     # Strip off the start characters
     if path[:1] == "?":
@@ -93,6 +94,7 @@ def peer_list(peer_list, compact):
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(s):
+        print('Got request: {s}'.format(s=s))
         # Decode the request
         package = decode_request(s.path)
 
@@ -110,7 +112,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         add_peer(s.server.torrents, info_hash, peer_id, ip, port)
 
         # Generate a response
-        response = {}
+        response = dict()
         response["interval"] = s.server.interval
         response["complete"] = 0
         response["incomplete"] = 0
@@ -124,6 +126,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Log the request, and what we send back
         info("PACKAGE: %s", package)
         info("RESPONSE: %s", response)
+        print('Send response: {response}'.format(response=response))
 
     """ Just supress logging. 
     """
