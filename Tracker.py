@@ -4,14 +4,13 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
 from logging import basicConfig, info, INFO
-from pickle import dump, load
 from socket import inet_aton
 from struct import pack
 from urllib.request import urlopen
 
 from urllib.parse import parse_qs
 from bencode import encode
-from simpledb import Database
+# from simpledb import Database
 
 
 """ Return the decoded request string. 
@@ -58,8 +57,9 @@ def make_compact_peer_list(peer_list):
 
 
 """ Return an expanded peer list suitable for the client, given
-	the peer list. 
+    the peer list. 
 """
+
 
 def make_peer_list(peer_list):
     peers = []
@@ -156,10 +156,11 @@ class Tracker:
 
         # If not in memory, give the database a file, otherwise it
         # will stay in memory
-        if not self.inmemory:
-            self.server_class.torrents = Database(torrent_db)
-        else:
-            self.server_class.torrents = Database(None)
+        # if not self.inmemory:
+        #     self.server_class.torrents = Database(torrent_db)
+        # else:
+        #     self.server_class.torrents = Database(None)
+        self.server_class.torrents = list()
 
     """ Keep handling requests, until told to stop. 
     """
@@ -175,7 +176,6 @@ class Tracker:
     def run(self):
         if not self.running:
             self.running = True
-
             self.thread = Thread(target = self.runner)
             self.thread.start()
 

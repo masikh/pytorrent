@@ -1,4 +1,3 @@
 libtorrent
 simpledb
-pickle
-BaseHTTPServer
+
