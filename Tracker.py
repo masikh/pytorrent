@@ -8,10 +8,11 @@ from pickle import dump, load
 from socket import inet_aton
 from struct import pack
 from urllib.request import urlopen
-from urlparse import parse_qs
 
+from urllib.parse import parse_qs
 from bencode import encode
 from simpledb import Database
+
 
 """ Return the decoded request string. 
 """
