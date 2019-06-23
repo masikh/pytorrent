@@ -75,6 +75,8 @@ def walk(exp, index = 1):
 
 def inflate(exp):
     # Base case, for an empty expression.
+    x =''
+    xs = ''
     if exp == "":
         return []
 

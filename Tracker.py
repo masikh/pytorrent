@@ -1,7 +1,7 @@
 # pytorrent-tracker.py
 # A bittorrent tracker
 
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Thread
 from logging import basicConfig, info, INFO
 from pickle import dump, load
