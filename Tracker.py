@@ -159,10 +159,10 @@ class Tracker:
 
         # If not in memory, give the database a file, otherwise it
         # will stay in memory
-        # if not self.inmemory:
-        #     self.server_class.torrents = Database(torrent_db)
-        # else:
-        #     self.server_class.torrents = Database(None)
+        if not self.inmemory:
+            self.server_class.torrents = Database(torrent_db)
+        else:
+            self.server_class.torrents = Database(None)
         self.server_class.torrents = list()
 
     """ Keep handling requests, until told to stop. 

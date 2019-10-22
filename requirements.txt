@@ -1,3 +1,5 @@
 libtorrent
 simpledb
+torf
+btdht
 

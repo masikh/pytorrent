@@ -2,7 +2,7 @@ from btdht import DHT
 import binascii
 import time
 from argparse import ArgumentParser
-
+import btdht
 
 """ Get peers for a given magnet link
 """
@@ -36,10 +36,11 @@ if __name__ == "__main__":
     magnet = args.magnet
 
     distributed_hash_table = DistributedHashTable()
-
+    a = btdht.RoutingTable.
     now = time.time()
     while True:
         peers = distributed_hash_table.get_peers(magnet)
+        info = distributed_hash_table.
         if peers is None or time.time() - now > 300:
             print('found 0 peers')
         else:

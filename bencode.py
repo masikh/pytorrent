@@ -21,15 +21,16 @@ from util import collapse
 """
 
 
-def stringlength(string, index = 0):
+def stringlength(data, index = 0):
 
     try:
-        colon = string.find(":", index)	# Find the colon, ending the number.
+        # Find the colon, ending the number
+        colon = data.find(":", index)
     except ValueError:
         raise BencodeError("Decode", "Malformed expression", data)
 
     # Return a list of the number characters.
-    num = [a for a in string[index:colon] if a.isdigit() ]
+    num = [a for a in data[index:colon] if a.isdigit()]
     n = int(collapse(num))	# Collapse them, and turn them into an int.
 
     # Return the length of the number, colon, and the string length.
@@ -75,7 +76,7 @@ def walk(exp, index = 1):
 
 def inflate(exp):
     # Base case, for an empty expression.
-    x =''
+    x = ''
     xs = ''
     if exp == "":
         return []
@@ -201,6 +202,7 @@ def decode_int(data):
 
 """ Given a string, returns a bencoded string of that string. 
 """
+
 
 def encode_str(data):
     check_type(data, str)
